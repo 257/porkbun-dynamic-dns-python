@@ -191,7 +191,7 @@ def get_myip(version: int) -> IPAddress | None:
 
 
 def delete_record(args, rec: Record, api_config: apiConfig):
-    endpoint = "https://porkbun.com/api/json/v3"
+    endpoint = "https://api.porkbun.com/api/json/v3"
     if isinstance(rec.content, IPAddress) and rec.content.version == 4:
         endpoint = "https://api-ipv4.porkbun.com/api/json/v3"
     endpoint += '/dns/delete/' + args.root + '/' + str(rec.id)
