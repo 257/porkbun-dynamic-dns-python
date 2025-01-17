@@ -16,7 +16,6 @@ from typing import (
     Any,
     Dict,
     IO,
-    Mapping,
     Optional,
     Sequence,
     Set,
@@ -128,7 +127,6 @@ def run(
     stdout: _FILE = None,
     stderr: _FILE = None,
     env: Dict[str, PathString] = {},
-    log: bool = True,
     **kwargs: Any,
 ) -> CompletedProcess:
 
@@ -166,14 +164,7 @@ def run(
         raise e
 
 
-# def get_myip(api_config: apiConfig, version: int) -> IPAddress:
 def get_myip(version: int) -> IPAddress | None:
-    # endpoint = ""
-    # if version == 6:
-    #     endpoint = "https://porkbun.com/api/json/v3/ping/"
-    # else:
-    #     endpoint = "https://api-ipv4.porkbun.com/api/json/v3/ping/"
-    # ping = json.loads(requests.post(endpoint, data=api_config.as_json).text)
     tmpdir = Path("/var/tmp/ebox")
     if tmpdir.exists():
         from shutil import rmtree
@@ -191,10 +182,7 @@ def get_myip(version: int) -> IPAddress | None:
 
 
 def delete_record(args, rec: Record, api_config: apiConfig):
-    endpoint = "https://api.porkbun.com/api/json/v3"
-    if isinstance(rec.content, IPAddress) and rec.content.version == 4:
-        endpoint = "https://api-ipv4.porkbun.com/api/json/v3"
-    endpoint += '/dns/delete/' + args.root + '/' + str(rec.id)
+    endpoint = api_config.endpoint + '/dns/delete/' + args.root + '/' + str(rec.id)
     rec2del = rec.asdict
     print(f"delete:\n{pformat(rec2del)}")
     rec2del.update(
@@ -208,13 +196,7 @@ def delete_record(args, rec: Record, api_config: apiConfig):
 
 
 def update_record(root: str, rec: Record, api_config: apiConfig):
-    endpoint = "https://porkbun.com/api/json/v3"
-    if isinstance(rec.content, IPAddress) and rec.content.version == 4:
-        endpoint = "https://api-ipv4.porkbun.com/api/json/v3"
-
-    # endpoint += f"/dns/edit/{rec.name}/{rec.id}"
-    endpoint += f"/dns/editByNameType/{root}/{rec.type}/{rec.name}"
-    print(endpoint)
+    endpoint = api_config.endpoint + f"/dns/editByNameType/{root}/{rec.type}/{rec.name}"
     rec2update = {
         'content': str(rec.content),
         'ttl': f"{rec.ttl}",
@@ -232,10 +214,6 @@ def update_record(root: str, rec: Record, api_config: apiConfig):
 
 
 def set_record(args: argparse.Namespace, rec: Record, api_config: apiConfig):
-    endpoint = "https://porkbun.com/api/json/v3"
-    if isinstance(rec.content, IPAddress) and rec.content.version == 4:
-        endpoint = "https://api-ipv4.porkbun.com/api/json/v3"
-
     endpoint = api_config.endpoint + '/dns/create/' + args.root
     new_rec = rec.asdict
     print(f"set:\n{pformat(new_rec)}")
